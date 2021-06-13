@@ -5,7 +5,7 @@ module.exports = {
     "name": "creategiveway",
     "description": "Stwórz nowy giveway!",
 
-    execute(message, args, client) {
+    async execute(message, args, client) {
 
         var config = client.configFile.find(c => c.guildId == message.guild.id);
 
@@ -39,22 +39,32 @@ module.exports = {
             return;
         }
 
-        if (typeof client.giveway.acctualGiveway.time !== 'undefined') {
+        var ifGiveWayExist = givewayOfThisGuild.acctualGiveway.find(e => e.exist == true);
+        
+        if (typeof ifGiveWayExist !== 'undefined') {
             message.channel.send("Aktualnie jest już jeden giveway!");
             return;
         }
 
-        let messageEmbed = new Discord.MessageEmbed()
-        .setTitle(`Giveway użytkownika ${message.author.username}`)
-        .addFields(
-            { name: "Nagroda: ", value: `${args[0]}`},
-            { name: "Wyniki za: ", value: `${args[1]}`}
-        )
-        .setColor("#DAA520")
-        .setFooter(`Aby wziąć udział kliknij ${givewayOfThisGuild.givewayEmoji}`)
+        await givewayOfThisGuild.acctualGiveway.splice(givewayOfThisGuild.acctualGiveway.indexOf(givewayOfThisGuild.author), 1);
 
-        message.guild.channels.cache.get(givewayOfThisGuild.givewayChannel).send(messageEmbed);
+        client.reloadConfig();
 
+        givewayOfThisGuild.acctualGiveway.push({
+
+            "author": message.author.id,
+            "time": "",
+            "reward": "",
+            "exist": true,
+            "ifUserCheck": false,
+            "timeType": "",
+            "users": []
+        });
+        givewayOfThisGuild.NextUserId = 1;
+
+        message.channel.send("A teraz napisz jaka będzie nagroda.");
+
+        client.reloadConfig();
 
     }
       

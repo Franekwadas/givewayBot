@@ -1,18 +1,1 @@
-[
-    {
-        "guildId": "849016068289986591",
-        "givewayEmoji": "🎉",
-        "givewayChannel": "853550377596485683",
-        "createGivewayChannel": "853557809932664833",
-        "acctualGiveway": [
-            {
-                "author": "",
-                "reward": "",
-                "time": "",
-                "users": [
-                    
-                ]
-            }
-        ]
-    }
-]
+[{"guildId":"849016068289986591","NextUserId":3,"givewayEmoji":"🎉","givewayChannel":"853550377596485683","createGivewayChannel":"853557809932664833","acctualGiveway":[]}]
