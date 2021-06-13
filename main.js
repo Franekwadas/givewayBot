@@ -1,3 +1,4 @@
+const keepAlive = require('./server.js'); 
 const Discord = require('discord.js');
 const Client = new Discord.Client();
 const giveway = require('./giveway.json');
@@ -20,8 +21,6 @@ Client.once('ready', async () => {
 });
 
 Client.on('message', async message => {
-
-    
 
     const givewayOfThisGuild = Client.giveway.find(g => g.guildId == message.guild.id);
     var ifAnyGivewayExist = givewayOfThisGuild.acctualGiveway.find(e => e.exist == true);
@@ -184,6 +183,8 @@ Client.runGiveway = async (message, JSONOfGiveway, infoInJSONofThisGiveway, potw
     .setFooter("Aby wziąć udział kliknij 🎉");
     
     if (potwierdzono == true) {
+        var config = Client.configFile.find(g => g.guildId == message.guild.id)
+        await message.guild.channels.cache.get(JSONOfGiveway.givewayChannel).send(`<@&${config.givewayRole}>`)
         let ReactionMessage = await message.guild.channels.cache.get(JSONOfGiveway.givewayChannel).send(messageEmbed);
         message.channel.send(`Wysłałem wiadomość na kanał: <#${JSONOfGiveway.givewayChannel}>`);
         ReactionMessage.react('🎉');
@@ -235,6 +236,14 @@ async function colldownOnGivewayToWin(guild) {
         .setDescription(`**Gratulację: <@${WinnerOfReward.userID}>!**\n**Udało ci się wygrać:** __${ifAnyGivewayExist.reward}__**!**`)
         .setFooter("Jeszcze raz gratuluje!")
 
+        const embed2 = new Discord.MessageEmbed()
+        .setTitle("Zostałeś zwycięscą giveway-a!")
+        .setColor("#b300ff")
+        .setDescription(`**Gratulację: <@${WinnerOfReward.userID}>!**\n**Udało ci się wygrać:** __${ifAnyGivewayExist.reward}__**!**`)
+        .setFooter("Jeszcze raz gratuluje!")
+        
+        var sendToUser = guild.members.cache.get(WinnerOfReward.userID).send(embed2);
+
         guild.channels.cache.get(givewayOfThisGuild.givewayChannel).send(embed);
         givewayOfThisGuild.acctualGiveway.splice(givewayOfThisGuild.acctualGiveway.indexOf(ifAnyGivewayExist), 1);
     }
@@ -269,4 +278,5 @@ Client.reloadConfig = () => {
 
 }
 
-Client.login('ODUzNTMyMzUwODAxMTE3MjE0.YMWv8g.6j_p9EM5zJjAqQca6sVxLpawKSo');
+keepAlive();
+Client.login(process.env['TOKEN']);
