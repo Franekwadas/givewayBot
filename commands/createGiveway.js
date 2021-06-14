@@ -57,6 +57,7 @@ module.exports = {
             "reward": "",
             "exist": true,
             "ifUserCheck": false,
+            "isDisable": false,
             "timeType": "",
             "users": []
         });

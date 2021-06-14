@@ -1,4 +1,3 @@
-const keepAlive = require('./server.js'); 
 const Discord = require('discord.js');
 const Client = new Discord.Client();
 const giveway = require('./giveway.json');
@@ -93,8 +92,10 @@ Client.on('message', async message => {
 
                 }
             } else if (typeof ifUserAcceptThatMessage !== 'undefined') {
+                if (givewayOfThisGuild.isDisable == true) return;
                 if (message.content.startsWith("koniec")) {
                     if (message.content.endsWith("acc")) {
+                        givewayOfThisGuild.isDisable = true;
                         Client.runGiveway(message, givewayOfThisGuild, ifAnyGivewayExist, true);
                     } else if (message.content.endsWith("dec")) {
                         givewayOfThisGuild.acctualGiveway.splice(givewayOfThisGuild.acctualGiveway.indexOf(ifAnyGivewayExist), 1);
@@ -242,7 +243,7 @@ async function colldownOnGivewayToWin(guild) {
         .setDescription(`**Gratulację: <@${WinnerOfReward.userID}>!**\n**Udało ci się wygrać:** __${ifAnyGivewayExist.reward}__**!**`)
         .setFooter("Jeszcze raz gratuluje!")
         
-        var sendToUser = guild.members.cache.get(WinnerOfReward.userID).send(embed2);
+        guild.members.cache.get(WinnerOfReward.userID).send(embed2);
 
         guild.channels.cache.get(givewayOfThisGuild.givewayChannel).send(embed);
         givewayOfThisGuild.acctualGiveway.splice(givewayOfThisGuild.acctualGiveway.indexOf(ifAnyGivewayExist), 1);
@@ -278,5 +279,4 @@ Client.reloadConfig = () => {
 
 }
 
-keepAlive();
-Client.login(process.env['TOKEN']);
+Client.login('ODUzNTMyMzUwODAxMTE3MjE0.YMWv8g.J8aZgqtJ4wDXOsSBFejPL0-Gl5M');
