@@ -1,11 +1,9 @@
 const Discord = require('discord.js');
 const Client = new Discord.Client();
 const giveway = require('./giveway.json');
-const czekanie = require('./czekanie.json');
 const fs = require("fs");
 Client.commands = new Discord.Collection();
 Client.configFile = JSON.parse(fs.readFileSync('./appconfig.json', 'utf8'));
-Client.czekanie = JSON.parse(fs.readFileSync('./czekanie.json', 'utf8'));
 Client.giveway = JSON.parse(fs.readFileSync('./giveway.json', 'utf8'));
 
 const commandFiles = fs.readdirSync('./commands/').filter(file => file.endsWith('.js'));
@@ -347,44 +345,6 @@ Client.reloadConfig = () => {
     }
 
     fs.writeFileSync('./appconfig.json', JSON.stringify(config));
-
-    try {
-        var czekanie = Client.czekanie;
-    } catch (error) {
-      console.error(error);
-    }
-
-    fs.writeFileSync('./czekanie.json', JSON.stringify(czekanie));
-
-}
-
-Client.loading = async (forWhat, whatChannel, wichTimeIsIt, guild) => {
-
-    /*if (typeof guild.channels.cache.get(whatChannel) === 'undefined') return;
-
-    if (wichTimeIsIt = 1) {
-        const messageSended = await guild.channels.cache.get(whatChannel).send("**X=-----------------{|}[Czekaj.]{|}-----------------=X**");
-        messageSended.edit("**X=---------------{/}[Czekaj..]{/}-----------------=X**");
-        messageSended.edit("**X=---------------{-}[Czekaj..]{-}-----------------=X**");
-
-        var waitMessagesOfThisGuild = Client.czekanie.find(g => g.guildId == guild.id);
-
-        if (typeof waitMessagesOfThisGuild === 'undefined') {
-            guild.channels.cache.get(whatChannel).send("Błąd");
-            console.log("Wystąpił błąd konfiguracyjny pliku czekanie.json");
-        }
-        
-        waitMessagesOfThisGuild.WaitMessages.push(
-            `${messageSended.id}`
-        )
-
-    }
-
-    if (wichTimeIsIt = 3) {
-        return;
-    } else {
-        Client.loading(forWhat, whatChannel, wichTimeIsIt+1);
-    }*/
 
 }
 
