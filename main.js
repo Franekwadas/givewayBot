@@ -1,9 +1,11 @@
 const Discord = require('discord.js');
 const Client = new Discord.Client();
 const giveway = require('./giveway.json');
+const czekanie = require('./czekanie.json');
 const fs = require("fs");
 Client.commands = new Discord.Collection();
 Client.configFile = JSON.parse(fs.readFileSync('./appconfig.json', 'utf8'));
+Client.czekanie = JSON.parse(fs.readFileSync('./czekanie.json', 'utf8'));
 Client.giveway = JSON.parse(fs.readFileSync('./giveway.json', 'utf8'));
 
 const commandFiles = fs.readdirSync('./commands/').filter(file => file.endsWith('.js'));
@@ -21,112 +23,141 @@ Client.once('ready', async () => {
 
 Client.on('message', async message => {
 
-    const givewayOfThisGuild = Client.giveway.find(g => g.guildId == message.guild.id);
-    var ifAnyGivewayExist = givewayOfThisGuild.acctualGiveway.find(e => e.exist == true);
+    if (!message.author.bot) {
+        const givewayOfThisGuild = Client.giveway.find(g => g.guildId == message.guild.id);
+        var ifAnyGivewayExist = givewayOfThisGuild.acctualGiveway.find(e => e.exist == true);
 
-    if (message.channel.id == givewayOfThisGuild.createGivewayChannel && !message.content.startsWith(Client.prefix) && !message.author.bot) {
+        if (message.channel.id == givewayOfThisGuild.createGivewayChannel && !message.content.startsWith(Client.prefix) && !message.author.bot) {
 
-        if (typeof givewayOfThisGuild === 'undefined') {
-            message.channel.send("Wystąpił nieoczekiwany błąd!");
-            return;
-        }
+            if (typeof givewayOfThisGuild === 'undefined') {
+                message.channel.send("Wystąpił nieoczekiwany błąd!");
+                return;
+            }
 
+            
+            if (typeof ifAnyGivewayExist !== 'undefined') {
+
+                if (!message.author.id == ifAnyGivewayExist.author) return;
+
+                var ifAnyRewardOfGivewayExist = givewayOfThisGuild.acctualGiveway.find(e => e.reward == "");
+                var ifAnyTimeOfGivewayExist = givewayOfThisGuild.acctualGiveway.find(e => e.time == "");
+                var ifUserAcceptThatMessage = givewayOfThisGuild.acctualGiveway.find(e => e.ifUserCheck == false);
+                var ifAnyRoleOfGivewayExist = givewayOfThisGuild.acctualGiveway.find(e => typeof e.roleId !== 'undefined');
+
+                if (typeof ifAnyRewardOfGivewayExist !== 'undefined' && typeof ifAnyRoleOfGivewayExist !== 'undefined') {
+                    
+                    if (message.content.startsWith("<@&") && message.content.endsWith(">")){
+                        var finalMessage1 = message.content.replace("<", "");
+                        var finalMessage2 = finalMessage1.replace("@", "");
+                        var finalMessage3 = finalMessage2.replace("&", "");
+                        var finalMessage4 = finalMessage3.replace(">", "");
+                        if (!isNaN(finalMessage4)) {
+                            
+                            if (typeof message.guild.roles.cache.get(finalMessage4) !== 'undefined') {
+
+                                ifAnyGivewayExist.rewardIsRole = true;
+                                ifAnyGivewayExist.roleId = finalMessage4;
+                                ifAnyGivewayExist.reward = `<@&${finalMessage4}>`
+                                message.channel.send("A teraz podaj za ile będą wyniki (Napisz liczbe wraz z m lub h lub d. Np. 60m 24h 1d)");
+
+                            } else {
+                                message.channel.send("Podaj prawidłowe id roli!");
+                            }
+
+                        } else message.channel.send("Podaj prawidłowe id roli!");
         
-        if (typeof ifAnyGivewayExist !== 'undefined') {
-
-            if (!message.author.id == ifAnyGivewayExist.author) return;
-
-            var ifAnyRewardOfGivewayExist = givewayOfThisGuild.acctualGiveway.find(e => e.reward == "");
-            var ifAnyTimeOfGivewayExist = givewayOfThisGuild.acctualGiveway.find(e => e.time == "");
-            var ifUserAcceptThatMessage = givewayOfThisGuild.acctualGiveway.find(e => e.ifUserCheck == false);
-
-            if (typeof ifAnyRewardOfGivewayExist !== 'undefined') {
-
-                ifAnyRewardOfGivewayExist.reward = message.content;
-                
-                message.channel.send("A teraz podaj za ile będą wyniki (Napisz liczbe wraz z m lub h lub d. Np. 60m 24h 1d)");
-
-            } else if (typeof ifAnyTimeOfGivewayExist !== 'undefined') {
-
-                if (message.content.endsWith("m")) {
-
-                    if (!isNaN(message.content.replace("m", ""))) {
-
-                        ifAnyTimeOfGivewayExist.time = (parseInt(message.content.replace("m", "")) * 60000).toString();
-                        ifAnyTimeOfGivewayExist.timeType = "m";
-
-                        Client.runGiveway(message, givewayOfThisGuild, ifAnyGivewayExist, false);
-
                     } else {
-                        message.channel.send("Podaj prawidłowy czas!");
-                    }
-                } else if (message.content.endsWith("h")) {
-
-                    if (!isNaN(message.content.replace("h", ""))) {
-
-                        ifAnyTimeOfGivewayExist.time = (parseInt(message.content.replace("h", "")) * 3600000).toString();
-                        ifAnyTimeOfGivewayExist.timeType = "h";
-
-                        Client.runGiveway(message, givewayOfThisGuild, ifAnyGivewayExist, false);
-
-                    } else {
-                        message.channel.send("Podaj prawidłowy czas!");
-                    }
-
-                } else if (message.content.endsWith("d")) {
-
-                    if (!isNaN(message.content.replace("d", ""))) {
-
-                        ifAnyTimeOfGivewayExist.time = (parseInt(message.content.replace("d", "")) * 86400000).toString();
-                        ifAnyTimeOfGivewayExist.timeType = "d";
-
-                        Client.runGiveway(message, givewayOfThisGuild, ifAnyGivewayExist, false);
+                        ifAnyRewardOfGivewayExist.reward = message.content;
+                        message.channel.send("A teraz podaj za ile będą wyniki (Napisz liczbe wraz z m lub h lub d. Np. 60m 24h 1d)");
                         
-                    } else {
-                        message.channel.send("Podaj prawidłowy czas!");
                     }
 
-                } else {
+                    
+                    
 
-                    message.channel.send("Napisz liczbe wraz z m lub h lub d. Np. 60m 24h 1d");
+                } else if (typeof ifAnyTimeOfGivewayExist !== 'undefined') {
 
-                }
-            } else if (typeof ifUserAcceptThatMessage !== 'undefined') {
-                if (givewayOfThisGuild.isDisable == true) return;
-                if (message.content.startsWith("koniec")) {
-                    if (message.content.endsWith("acc")) {
-                        givewayOfThisGuild.isDisable = true;
-                        Client.runGiveway(message, givewayOfThisGuild, ifAnyGivewayExist, true);
-                    } else if (message.content.endsWith("dec")) {
-                        givewayOfThisGuild.acctualGiveway.splice(givewayOfThisGuild.acctualGiveway.indexOf(ifAnyGivewayExist), 1);
-                        message.channel.send("Prosze bardzo można zacząć prace od nowa :smile:");
+                    if (message.content.endsWith("m")) {
+
+                        if (!isNaN(message.content.replace("m", ""))) {
+
+                            ifAnyTimeOfGivewayExist.time = (parseInt(message.content.replace("m", "")) * 60000).toString();
+                            ifAnyTimeOfGivewayExist.timeType = "m";
+
+                            Client.runGiveway(message, givewayOfThisGuild, ifAnyGivewayExist, false);
+
+                        } else {
+                            message.channel.send("Podaj prawidłowy czas!");
+                        }
+                    } else if (message.content.endsWith("h")) {
+
+                        if (!isNaN(message.content.replace("h", ""))) {
+
+                            ifAnyTimeOfGivewayExist.time = (parseInt(message.content.replace("h", "")) * 3600000).toString();
+                            ifAnyTimeOfGivewayExist.timeType = "h";
+
+                            Client.runGiveway(message, givewayOfThisGuild, ifAnyGivewayExist, false);
+
+                        } else {
+                            message.channel.send("Podaj prawidłowy czas!");
+                        }
+
+                    } else if (message.content.endsWith("d")) {
+
+                        if (!isNaN(message.content.replace("d", ""))) {
+
+                            ifAnyTimeOfGivewayExist.time = (parseInt(message.content.replace("d", "")) * 86400000).toString();
+                            ifAnyTimeOfGivewayExist.timeType = "d";
+
+                            Client.runGiveway(message, givewayOfThisGuild, ifAnyGivewayExist, false);
+                            
+                        } else {
+                            message.channel.send("Podaj prawidłowy czas!");
+                        }
+
+                    } else {
+
+                        message.channel.send("Napisz liczbe wraz z m lub h lub d. Np. 60m 24h 1d");
+
+                    }
+                } else if (typeof ifUserAcceptThatMessage !== 'undefined') {
+                    if (ifAnyGivewayExist.isDisable == true) return;
+                    if (message.content.startsWith("koniec")) {
+                        if (message.content.endsWith("acc")) {
+                            ifAnyGivewayExist.isDisable = true;
+                            Client.runGiveway(message, givewayOfThisGuild, ifAnyGivewayExist, true);
+                        } else if (message.content.endsWith("dec")) {
+                            givewayOfThisGuild.acctualGiveway.splice(givewayOfThisGuild.acctualGiveway.indexOf(ifAnyGivewayExist), 1);
+                            message.channel.send("Prosze bardzo można zacząć prace od nowa :smile:");
+                        }
                     }
                 }
             }
+
         }
 
+        Client.reloadConfig();
+    
+    
+
+        Client.prefix = await Client.configFile.find(g => g.guildId == message.guild.id).prefix;
+
+        if (!message.content.startsWith(Client.prefix) || message.author.bot) return;
+
+        const args = message.content.slice(Client.prefix.length).split(/ +/);
+        var command = args.shift().toLowerCase();
+
+        try {
+            Client.commands.get(command).execute(message, args, Client);
+
+        } catch (error) {
+            
+            message.channel.send(`Przykro mi ale niestety nie znam takiej komendy. Aby zobaczyć moją liste komend wpisz ${Client.prefix}pomoc`);
+
+            console.error(error);
+
+        }
     }
-
-    Client.reloadConfig();
-
-    Client.prefix = await Client.configFile.find(g => g.guildId == message.guild.id).prefix;
-
-    if (!message.content.startsWith(Client.prefix) || message.author.bot) return;
-
-    const args = message.content.slice(Client.prefix.length).split(/ +/);
-    var command = args.shift().toLowerCase();
-
-    try {
-        Client.commands.get(command).execute(message, args, Client);
-
-    } catch (error) {
-        
-        message.channel.send(`Przykro mi ale niestety nie znam takiej komendy. Aby zobaczyć moją liste komend wpisz ${Client.prefix}pomoc`);
-
-        console.error(error);
-
-    }
-
 });
 
 Client.on('messageReactionAdd', async (reaction, user) => {
@@ -200,6 +231,10 @@ Client.runGiveway = async (message, JSONOfGiveway, infoInJSONofThisGiveway, potw
         setTimeout(async () => {
 
             await message.channel.send(messageEmbed);
+
+        }, 1200);
+        setTimeout(async () => {
+
             await message.channel.send('\n\n**Jeżeli chcesz potwierdzić wpisz: "koniec acc" a jeśli nie to wpisz "koniec dec"**');
 
         }, 1200);
@@ -219,34 +254,62 @@ async function colldownOnGivewayToWin(guild) {
     var max = givewayOfThisGuild.NextUserId-1;
 
     var Winner = Math.floor( Math.random() * ( max - min + 1 ) + min );
-
-    console.log(Winner);
     
     if (typeof ifAnyGivewayExist !== 'undefined') {
         var WinnerOfReward = ifAnyGivewayExist.users.find(i => i.idToJSONSorting == Winner);
 
         if(typeof WinnerOfReward === 'undefined') {
+            
             guild.channels.cache.get(givewayOfThisGuild.givewayChannel).send("**Przykro mi, ale niestety nikt się nie zgłosił.**");
             givewayOfThisGuild.acctualGiveway.splice(givewayOfThisGuild.acctualGiveway.indexOf(ifAnyGivewayExist), 1);
             return;
-        } 
+            
+        }
 
         const embed = new Discord.MessageEmbed()
         .setTitle("Zwycięsca giveway-a wybrany!")
         .setColor("#b300ff")
-        .setDescription(`**Gratulację: <@${WinnerOfReward.userID}>!**\n**Udało ci się wygrać:** __${ifAnyGivewayExist.reward}__**!**`)
+        .setDescription(`**Gratulację: <@${WinnerOfReward.userID}>!**\n**Udało ci się wygrać:** ${ifAnyGivewayExist.reward}**!**`)
         .setFooter("Jeszcze raz gratuluje!")
 
-        const embed2 = new Discord.MessageEmbed()
-        .setTitle("Zostałeś zwycięscą giveway-a!")
-        .setColor("#b300ff")
-        .setDescription(`**Gratulację: <@${WinnerOfReward.userID}>!**\n**Udało ci się wygrać:** __${ifAnyGivewayExist.reward}__**!**`)
-        .setFooter("Jeszcze raz gratuluje!")
+
+        if (ifAnyGivewayExist.rewardIsRole != true) {
+            var embed2 = new Discord.MessageEmbed()
+            .setTitle("Zostałeś zwycięscą giveway-a!")
+            .setColor("#b300ff")
+            .setDescription(`**Gratulację: <@${WinnerOfReward.userID}>!**\n**Udało ci się wygrać:** ${ifAnyGivewayExist.reward}**!**`)
+            .setFooter("Jeszcze raz gratuluje!")
+        } else {
+            var embed2 = new Discord.MessageEmbed()
+            .setTitle("Zostałeś zwycięscą giveway-a!")
+            .setColor("#b300ff")
+            .setDescription(`**Gratulację: <@${WinnerOfReward.userID}>!**\n**Udało ci się wygrać **Specjalną role z naszego givewaya!**!**`)
+            .setFooter("Jeszcze raz gratuluje!")
+        }
+
         
-        guild.members.cache.get(WinnerOfReward.userID).send(embed2);
+        
+        var officialWiner = guild.members.cache.get(WinnerOfReward.userID);
+        
+        if (ifAnyGivewayExist.rewardIsRole == true) {
+            if (typeof guild.roles.cache.get(ifAnyGivewayExist.roleId) !== 'undefined') {
+                if(officialWiner.roles.cache.has(ifAnyGivewayExist.roleId)) {
 
-        guild.channels.cache.get(givewayOfThisGuild.givewayChannel).send(embed);
-        givewayOfThisGuild.acctualGiveway.splice(givewayOfThisGuild.acctualGiveway.indexOf(ifAnyGivewayExist), 1);
+                    colldownOnGivewayToWin(guild);
+                    return;
+
+                } else {
+                    officialWiner.roles.add(ifAnyGivewayExist.roleId);
+                    officialWiner.send(embed2);
+
+                    guild.channels.cache.get(givewayOfThisGuild.givewayChannel).send(embed);
+
+                    givewayOfThisGuild.acctualGiveway.splice(givewayOfThisGuild.acctualGiveway.indexOf(ifAnyGivewayExist), 1);
+                }
+            }
+        }
+
+        
     }
 
 
@@ -276,6 +339,52 @@ Client.reloadConfig = () => {
     }
 
     fs.writeFileSync('./giveway.json', JSON.stringify(giveway));
+
+    try {
+        var config = Client.configFile;
+    } catch (error) {
+      console.error(error);
+    }
+
+    fs.writeFileSync('./appconfig.json', JSON.stringify(config));
+
+    try {
+        var czekanie = Client.czekanie;
+    } catch (error) {
+      console.error(error);
+    }
+
+    fs.writeFileSync('./czekanie.json', JSON.stringify(czekanie));
+
+}
+
+Client.loading = async (forWhat, whatChannel, wichTimeIsIt, guild) => {
+
+    /*if (typeof guild.channels.cache.get(whatChannel) === 'undefined') return;
+
+    if (wichTimeIsIt = 1) {
+        const messageSended = await guild.channels.cache.get(whatChannel).send("**X=-----------------{|}[Czekaj.]{|}-----------------=X**");
+        messageSended.edit("**X=---------------{/}[Czekaj..]{/}-----------------=X**");
+        messageSended.edit("**X=---------------{-}[Czekaj..]{-}-----------------=X**");
+
+        var waitMessagesOfThisGuild = Client.czekanie.find(g => g.guildId == guild.id);
+
+        if (typeof waitMessagesOfThisGuild === 'undefined') {
+            guild.channels.cache.get(whatChannel).send("Błąd");
+            console.log("Wystąpił błąd konfiguracyjny pliku czekanie.json");
+        }
+        
+        waitMessagesOfThisGuild.WaitMessages.push(
+            `${messageSended.id}`
+        )
+
+    }
+
+    if (wichTimeIsIt = 3) {
+        return;
+    } else {
+        Client.loading(forWhat, whatChannel, wichTimeIsIt+1);
+    }*/
 
 }
 

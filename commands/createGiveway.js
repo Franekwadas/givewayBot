@@ -58,6 +58,8 @@ module.exports = {
             "exist": true,
             "ifUserCheck": false,
             "isDisable": false,
+            "rewardIsRole": false,
+            "roleId": null,
             "timeType": "",
             "users": []
         });
