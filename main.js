@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const keepAlive = require('./server');
 const Client = new Discord.Client();
 const giveway = require('./giveway.json');
 const fs = require("fs");
@@ -347,4 +348,5 @@ Client.reloadConfig = () => {
 
 }
 
-Client.login('ODUzNTMyMzUwODAxMTE3MjE0.YMWv8g.MdTiFru88BVwy2zsATM__pnDu-c');
+keepAlive();
+Client.login(process.env['TOKEN']);
