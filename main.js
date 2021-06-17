@@ -292,13 +292,8 @@ async function colldownOnGivewayToWin(guild) {
         if (ifAnyGivewayExist.rewardIsRole == true) {
             if (typeof guild.roles.cache.get(ifAnyGivewayExist.roleId) !== 'undefined') {
                 if(officialWiner.roles.cache.has(ifAnyGivewayExist.roleId)) {
-                    if (givewayOfThisGuild.NextUserId > 2) {
-                        colldownOnGivewayToWin(guild);
-                        return;
-                    } else {
-                        message.channel.send(`**Przykro mi <@${WinnerOfReward.userID}> ale masz już role <@&${ifAnyGivewayExist.roleId}> a nikt poza tobą się nie zgłosił.**`);
-                    }
                         
+                    message.channel.send(`**Przykro mi <@${WinnerOfReward.userID}> ale masz już role <@&${ifAnyGivewayExist.roleId}>.**`);  
 
                 } else {
                     officialWiner.roles.add(ifAnyGivewayExist.roleId);
