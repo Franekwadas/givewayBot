@@ -294,7 +294,11 @@ async function colldownOnGivewayToWin(guild) {
             if (typeof guild.roles.cache.get(ifAnyGivewayExist.roleId) !== 'undefined') {
                 if(officialWiner.roles.cache.has(ifAnyGivewayExist.roleId)) {
                         
-                    message.channel.send(`**Przykro mi <@${WinnerOfReward.userID}> ale masz już role <@&${ifAnyGivewayExist.roleId}>.**`);  
+                    guild.channels.cache.get(givewayOfThisGuild.givewayChannel).send(`**Przykro mi <@${WinnerOfReward.userID}> ale masz już role <@&${ifAnyGivewayExist.roleId}>.**`);  
+
+                    givewayOfThisGuild.acctualGiveway.splice(givewayOfThisGuild.acctualGiveway.indexOf(ifAnyGivewayExist), 1);
+
+                    Client.reloadConfig();
 
                 } else {
                     officialWiner.roles.add(ifAnyGivewayExist.roleId);
@@ -303,6 +307,8 @@ async function colldownOnGivewayToWin(guild) {
                     guild.channels.cache.get(givewayOfThisGuild.givewayChannel).send(embed);
 
                     givewayOfThisGuild.acctualGiveway.splice(givewayOfThisGuild.acctualGiveway.indexOf(ifAnyGivewayExist), 1);
+
+                    Client.reloadConfig();
                 }
             }
         }
